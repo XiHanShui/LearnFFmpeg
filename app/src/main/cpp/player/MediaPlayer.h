@@ -27,22 +27,29 @@ class MediaPlayer {
 public:
     MediaPlayer(){};
     virtual ~MediaPlayer(){};
-
+    /*初始化数据*/
     virtual void Init(JNIEnv *jniEnv, jobject obj, char *url, int renderType, jobject surface) = 0;
+    /*释放数据*/
     virtual void UnInit() = 0;
-
+    /*播放*/
     virtual void Play() = 0;
+    /*暂停*/
     virtual void Pause() = 0;
+    /*停止*/
     virtual void Stop() = 0;
+    /*跳转*/
     virtual void SeekToPosition(float position) = 0;
+    /*获取媒体参数*/
     virtual long GetMediaParams(int paramType) = 0;
+    /*设置媒体参数*/
     virtual void SetMediaParams(int paramType, jobject obj){}
-
+    /*获取当前线程env*/
     virtual JNIEnv *GetJNIEnv(bool *isAttach) = 0;
     virtual jobject GetJavaObj() = 0;
     virtual JavaVM *GetJavaVM() = 0;
-
+    /*用于线程切换 创建env*/
     JavaVM *m_JavaVM = nullptr;
+    /*java 调用层对象 用户反射调用*/
     jobject m_JavaObj = nullptr;
 };
 
