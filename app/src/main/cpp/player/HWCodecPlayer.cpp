@@ -283,12 +283,14 @@ void HWCodecPlayer::AudioDecodeThreadProc(HWCodecPlayer *player) {
     env->CallVoidMethod(player->m_JavaObj, createTrackMid, AUDIO_DST_SAMPLE_RATE, outChannelNb);
 
     for(;;) {
+        /* 暂停播放时会调用这里*/
         while (player->m_PlayerState == PLAYER_STATE_PAUSE) {
             std::unique_lock<std::mutex> lock(player->m_Mutex);
             LOGCATE("HWCodecPlayer::AudioDecodeThreadProc waiting .......");
             player->m_Cond.wait_for(lock, std::chrono::milliseconds(10));
         }
 
+        /*通知播放时直接退出*/
         if(player->m_PlayerState == PLAYER_STATE_STOP) {
             break;
         }
@@ -299,8 +301,9 @@ void HWCodecPlayer::AudioDecodeThreadProc(HWCodecPlayer *player) {
             isLocked = false;
             lock.unlock();
         }
-        if(audioPacketQueue->GetPacket(audioPacket) < 0)
+        if(audioPacketQueue->GetPacket(audioPacket) < 0){
             break;
+        }
 
         int ret = avcodec_send_packet(audioCodecCtx, audioPacket);
         if (ret < 0) {
@@ -331,8 +334,9 @@ void HWCodecPlayer::AudioDecodeThreadProc(HWCodecPlayer *player) {
 //                usleep(sleepMs * 1000);
 //            }
 
-            if(player->m_SeekPosition < 0)
+            if(player->m_SeekPosition < 0){
                 PostMessage(player, MSG_DECODING_TIME, presentationNano * 1.0f / 1000);
+            }
             LOGCATE("HWCodecPlayer::AudioDecodeThreadProc sync audio curPts = %lf", presentationNano);
 
             swr_convert(player->m_SwrCtx, &audioOutBuffer, AUDIO_DST_SAMPLE_RATE * 2, (const uint8_t **)audioFrame->data, audioFrame->nb_samples);
@@ -588,8 +592,9 @@ int HWCodecPlayer::InitDecoder() {
             break;
         }
 
-        if(isAttach)
+        if(isAttach){
             GetJavaVM()->DetachCurrentThread();
+        }
 
         m_SwrCtx = swr_alloc();
         uint64_t out_ch_layout = AV_CH_LAYOUT_STEREO;

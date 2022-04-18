@@ -41,8 +41,9 @@ public:
     virtual JNIEnv *GetJNIEnv(bool *isAttach) = 0;
     virtual jobject GetJavaObj() = 0;
     virtual JavaVM *GetJavaVM() = 0;
-
+    /*主要用于前线切换时获取当前的env*/
     JavaVM *m_JavaVM = nullptr;
+    /**/
     jobject m_JavaObj = nullptr;
 };
 
