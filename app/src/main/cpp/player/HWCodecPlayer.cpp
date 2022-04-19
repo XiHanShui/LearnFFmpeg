@@ -71,9 +71,11 @@ void HWCodecPlayer::UnInit() {
 
 void HWCodecPlayer::Play() {
     LOGCATE("HWCodecPlayer::Play");
+    /*如果线程指针为空  则没有开始线程执行*/
     if(m_DeMuxThread == nullptr) {
         m_DeMuxThread = new thread(DeMuxThreadProc, this);
     } else {
+        /*线程不为空，修改播放状态，可能是暂停播放了*/
         std::unique_lock<std::mutex> lock(m_Mutex);
         m_PlayerState = PLAYER_STATE_PLAYING;
         m_Cond.notify_all();
